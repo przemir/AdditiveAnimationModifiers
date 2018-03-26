@@ -143,6 +143,10 @@ def clearPose(obj):
 # bpy.app.handlers.frame_change_post.clear()
 # bpy.app.handlers.frame_change_post.append(additiveAnimationModifiersPostHandler)
 
+def recalculateFrame(self, context):
+    frame = bpy.context.scene.frame_current
+    context.scene.frame_set(frame)
+    
 @persistent
 def additiveAnimationModifiersPreHandler(scene):
     if not scene.additive_animation_enabled:
@@ -206,6 +210,7 @@ class Uilist_actions(bpy.types.Operator):
                 item_next = scn.additive_animations[idx+1].name
                 scn.additive_animations.move(idx, idx + 1)
                 scn.additive_animations_index += 1
+                recalculateFrame(None, context)
                 #info = 'Item %d selected' % (scn.additive_animations_index + 1)
                 #self.report({'INFO'}, info)
 
@@ -213,6 +218,7 @@ class Uilist_actions(bpy.types.Operator):
                 item_prev = scn.additive_animations[idx-1].name
                 scn.additive_animations.move(idx, idx-1)
                 scn.additive_animations_index -= 1
+                recalculateFrame(None, context)
                 #info = 'Item %d selected' % (scn.additive_animations_index + 1)
                 #self.report({'INFO'}, info)
 
@@ -221,11 +227,13 @@ class Uilist_actions(bpy.types.Operator):
                 scn.additive_animations_index -= 1
                 #self.report({'INFO'}, info)
                 scn.additive_animations.remove(idx)
+                recalculateFrame(None, context)
 
         if self.action == 'ADD':
             item = scn.additive_animations.add()
             item.id = len(scn.additive_animations)
             scn.additive_animations_index = (len(scn.additive_animations)-1)
+            recalculateFrame(None, context)
             #info = '%s added to list' % (item.name)
             #self.report({'INFO'}, info)
 
@@ -357,8 +365,8 @@ class Uilist_insertKeyLocRot(bpy.types.Operator):
 class CustomProp(bpy.types.PropertyGroup):
     '''name = StringProperty() '''
     id = IntProperty()
-    enabled = BoolProperty(default=True);
-    action = PointerProperty(name="Action", type=bpy.types.Action)
+    enabled = BoolProperty(default=True, update=recalculateFrame);
+    action = PointerProperty(name="Action", type=bpy.types.Action, update=recalculateFrame)
 
 # bpy.data.window_managers[0].keyconfigs.active.keymaps['Mesh'].keymap_items.new('op.idname',value='PRESS',type=' A',ctrl=True,alt=True,shift=True,oskey=True)
 # bpy.data.window_managers[0].keyconfigs.active.keymaps['Animation'].keymap_items.new('op.idname',value='PRESS',type=' A',ctrl=True,alt=True,shift=True,oskey=True)
@@ -376,7 +384,7 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.types.Armature.additive_animations = CollectionProperty(type=CustomProp)
     bpy.types.Armature.additive_animations_index = IntProperty()
-    bpy.types.Scene.additive_animation_enabled = BoolProperty(default=False)
+    bpy.types.Scene.additive_animation_enabled = BoolProperty(default=False, update=recalculateFrame)
     bpy.types.Scene.additive_animation_update_is_needed = BoolProperty(default=False)
     bpy.app.handlers.scene_update_pre.append(postSceneUpdate)
     bpy.app.handlers.frame_change_pre.append(additiveAnimationModifiersPreHandler)

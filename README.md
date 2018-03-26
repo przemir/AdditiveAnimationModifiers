@@ -21,6 +21,9 @@ Fill field with "anim.insert_keyframe_menu".
 
 Limitation
 
-- Only location and rotation
-- Auto generating keyframes should be disabled
-- Every time scene frame changed, all bones (even those unused in action) will be calculated from rest pose. To disable this behaviour disable "Enable addon for scene".
+- Only location and rotation.
+- No Axis Angle rotation mode support now.
+- Auto generating keyframes should be disabled.
+- Every time scene frame changed, all bones (even those unused in action) will be calculated from rest pose (works like "Clear pose transforms" on all unused bones). To disable this behaviour disable "Enable addon for scene".
+- Additive animation track will be used without constraints.
+- Changing every property (like visibility of additive animation modifier) cause lost of modified pose transforms.
